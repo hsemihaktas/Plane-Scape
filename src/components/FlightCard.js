@@ -3,7 +3,23 @@ import React from 'react';
 const FlightCard = ({ flight }) => {
   const handlePurchase = () => {
     window.location.href = '/ucuslarim';
-    
+    // Send flight.id to the server for saving
+    // fetch('/save-flight', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify({ flightId: flight.id }),
+    // })
+    //   .then(response => response.json())
+    //   .then(data => {
+    //     console.log('Flight saved:', data);
+    //     // Optionally, redirect to the saved flights page
+    //     window.location.href = '/ucuslarim';
+    //   })
+    //   .catch(error => {
+    //     console.error('Error saving flight:', error);
+    //   });
   };
 
   return (
