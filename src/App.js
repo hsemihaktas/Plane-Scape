@@ -11,6 +11,7 @@ const flightsData = [
     to: "Madrid",
     departureTime: "7:30 AM",
     arrivalTime: "9:55 AM",
+    stops: "nonstop",
     price: 200,
   },
   {
@@ -18,7 +19,24 @@ const flightsData = [
     to: "Madrid",
     departureTime: "8:30 PM",
     arrivalTime: "10:45 PM",
+    stops: "1stop",
     price: 234,
+  },
+  {
+    from: "Milano",
+    to: "Paris",
+    departureTime: "9:00 AM",
+    arrivalTime: "11:30 AM",
+    stops: "nonstop",
+    price: 180,
+  },
+  {
+    from: "Milano",
+    to: "London",
+    departureTime: "1:30 PM",
+    arrivalTime: "4:00 PM",
+    stops: "2stops",
+    price: 250,
   },
 ];
 
@@ -26,17 +44,30 @@ const App = () => {
   const [filteredFlights, setFilteredFlights] = useState(flightsData);
 
   const handleFilter = (filters) => {
-    const { minPrice, maxPrice, sortOrder } = filters;
+    const { minPrice, maxPrice, sortOrder, arrivalTime, stops } = filters;
 
     let newFlights = flightsData.filter((flight) => {
       const isAboveMinPrice =
         minPrice !== null ? flight.price >= minPrice : true;
       const isBelowMaxPrice =
         maxPrice !== null ? flight.price <= maxPrice : true;
-      return isAboveMinPrice && isBelowMaxPrice;
+      const isCorrectArrivalTime =
+        arrivalTime === "morning"
+          ? flight.arrivalTime >= "5:00 AM" && flight.arrivalTime <= "11:59 AM"
+          : arrivalTime === "afternoon"
+          ? flight.arrivalTime >= "12:00 PM" && flight.arrivalTime <= "5:59 PM"
+          : true;
+      const isCorrectStops = stops ? flight.stops === stops : true;
+
+      return (
+        isAboveMinPrice &&
+        isBelowMaxPrice &&
+        isCorrectArrivalTime &&
+        isCorrectStops
+      );
     });
 
-    // Fiyat sıralamasını uyguluyoruz
+    // Fiyat sıralaması
     if (sortOrder === "ascending") {
       newFlights = newFlights.sort((a, b) => a.price - b.price);
     } else if (sortOrder === "descending") {
@@ -57,12 +88,8 @@ const App = () => {
               <FlightCard key={index} flight={flight} />
             ))}
           </div>
-          <div>
-            <FilterPanel onFilter={handleFilter} />
-          </div>
-          <div>
-            <Sidebar />
-          </div>
+          <FilterPanel onFilter={handleFilter} />
+          <Sidebar />
         </div>
       </div>
     </div>
