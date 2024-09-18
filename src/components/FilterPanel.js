@@ -4,16 +4,16 @@ const FilterPanel = ({ onFilter }) => {
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [sortOrder, setSortOrder] = useState('');
-  const [arrivalTime, setArrivalTime] = useState('');
-  const [stops, setStops] = useState('');
+  const [arrivalHour, setArrivalHour] = useState('');
+  const [stops, setStops] = useState();
 
   const handleFilter = () => {
     onFilter({
       minPrice: minPrice ? parseInt(minPrice, 10) : null,
       maxPrice: maxPrice ? parseInt(maxPrice, 10) : null,
       sortOrder: sortOrder,
-      arrivalTime: arrivalTime,
-      stops: stops
+      arrivalHour: arrivalHour,
+      stops: parseInt(stops)
     });
   };
 
@@ -63,22 +63,22 @@ const FilterPanel = ({ onFilter }) => {
           <label className="flex items-center">
             <input
               type="radio"
-              value="morning"
-              checked={arrivalTime === 'morning'}
-              onChange={(e) => setArrivalTime(e.target.value)}
+              value="00:00-00:30"
+              checked={arrivalHour === '00:00-00:30'}
+              onChange={(e) => setArrivalHour(e.target.value)}
               className="mr-2"
             />
-            5:00 AM - 11:59 AM
+            00:00 - 00:30
           </label>
           <label className="flex items-center">
             <input
               type="radio"
-              value="afternoon"
-              checked={arrivalTime === 'afternoon'}
-              onChange={(e) => setArrivalTime(e.target.value)}
+              value="00:30-01:00"
+              checked={arrivalHour === '00:30-01:00'}
+              onChange={(e) => setArrivalHour(e.target.value)}
               className="mr-2"
             />
-            12:00 PM - 5:59 PM
+            00:30 - 01:00
           </label>
         </div>
       </div>
@@ -90,7 +90,7 @@ const FilterPanel = ({ onFilter }) => {
         <label className="flex items-center">
             <input
               type="radio"
-              value=""
+              value=''
               checked={stops === ''}
               onChange={(e) => setStops(e.target.value)}
               className="mr-2"
@@ -100,8 +100,8 @@ const FilterPanel = ({ onFilter }) => {
           <label className="flex items-center">
             <input
               type="radio"
-              value="nonstop"
-              checked={stops === 'nonstop'}
+              value={99}
+              checked={stops === '99'}
               onChange={(e) => setStops(e.target.value)}
               className="mr-2"
             />
@@ -110,8 +110,8 @@ const FilterPanel = ({ onFilter }) => {
           <label className="flex items-center">
             <input
               type="radio"
-              value="1stop"
-              checked={stops === '1stop'}
+              value={1}
+              checked={stops === '1'}
               onChange={(e) => setStops(e.target.value)}
               className="mr-2"
             />
@@ -120,8 +120,8 @@ const FilterPanel = ({ onFilter }) => {
           <label className="flex items-center">
             <input
               type="radio"
-              value="2stops"
-              checked={stops === '2stops'}
+              value={2}
+              checked={stops === '2'}
               onChange={(e) => setStops(e.target.value)}
               className="mr-2"
             />
