@@ -9,7 +9,7 @@ const NavBar = () => {
         <button className="text-gray-600">Discover</button>
         <div className="flex items-center">
           <img src="./images/people.jpg" alt="user" className="rounded-full w-8 h-8"/>
-          <span className="ml-2">Joane Smith</span>
+          <span className="ml-2">Semih Aktas</span>
         </div>
       </div>
     </header>

@@ -31,6 +31,7 @@ app.get("/flights", (req, res) => {
 
           // Sadece gerekli verileri çekme
           const flightData = flights.map((flight) => ({
+            id: flight.id,
             prefixIATA: flight.prefixIATA,
             destinationAirport: flight.route.destinations[0],
             departureTime: flight.scheduleDateTime,
