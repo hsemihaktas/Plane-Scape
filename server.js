@@ -3,16 +3,16 @@ const https = require("https");
 const mongoose = require("mongoose");
 const app = express();
 const port = 3001;
-const cors = require('cors');
+const cors = require("cors");
 
 // CORS Middleware'ini kullanarak frontend'den gelen istekleri kabul et
-app.use(cors()); 
+app.use(cors());
 app.use(express.json()); // JSON formatında gelen verileri alabilmek için
 
 // MongoDB bağlantısını sağla
-mongoose.connect('mongodb://localhost:27017/flightsDB', {
+mongoose.connect("mongodb://localhost:27017/flightsDB", {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
 });
 
 // MongoDB'de flight ID'lerini kaydedeceğimiz model
@@ -20,10 +20,10 @@ const FlightSchema = new mongoose.Schema({
   flightId: String, // Sadece flight ID'yi kaydetmek yeterli
 });
 
-const Flight = mongoose.model('Flight', FlightSchema);
+const Flight = mongoose.model("Flight", FlightSchema);
 
 // Uçuş verilerini API'den çeken ve sadece gerekli bilgileri dönen uçuş endpoint'i
-app.get("/flights", (req, res) => {
+app.get("/allFlights", (req, res) => {
   const options = {
     method: "GET",
     hostname: "api.schiphol.nl",
@@ -78,14 +78,14 @@ app.post("/save-flight", async (req, res) => {
     const newFlight = new Flight({ flightId });
     await newFlight.save();
 
-    res.status(200).json({ message: 'Uçuş başarıyla kaydedildi' });
+    res.status(200).json({ message: "Uçuş başarıyla kaydedildi" });
   } catch (error) {
-    res.status(500).json({ error: 'Uçuş kaydedilemedi' });
+    res.status(500).json({ error: "Uçuş kaydedilemedi" });
   }
 });
 
 // /uçuşlarım sayfası için kaydedilen uçuşları getiren endpoint
-app.get("/ucuslarim", async (req, res) => {
+app.get("/myFlights", async (req, res) => {
   try {
     // Veritabanından kaydedilen uçuş ID'lerini çek
     const savedFlights = await Flight.find();
@@ -106,39 +106,59 @@ app.get("/ucuslarim", async (req, res) => {
           },
         };
 
-        https.request(options, (response) => {
-          let data = "";
+        https
+          .request(options, (response) => {
+            let data = "";
 
-          response.on("data", (chunk) => (data += chunk));
+            response.on("data", (chunk) => (data += chunk));
 
-          response.on("end", () => {
-            try {
-              const flight = JSON.parse(data);
+            response.on("end", () => {
+              try {
+                const flight = JSON.parse(data);
 
-              // Sadece gerekli verileri frontend'e döndür
-              resolve({
-                from: flight.route.destinations[0], // Kalkış yeri
-                to: flight.route.destinations[1], // Varış yeri
-                departureDay: flight.scheduleDateTime.split("T")[0], // Kalkış günü
-                departureHour: flight.scheduleDateTime.split("T")[1], // Kalkış saati
-                arrivalDay: flight.actualLandingTime.split("T")[0], // Varış günü
-                arrivalHour: flight.actualLandingTime.split("T")[1], // Varış saati
-                price: 100, // Örnek fiyat, gerçek fiyatı buradan bulabilirsiniz
-              });
-            } catch (error) {
-              reject("Uçuş detayları alınamadı");
-            }
-          });
-        })
-        .on("error", (error) => reject(error))
-        .end();
+                let departureD = "UNKNOWN";
+                let departureH = "UNKNOWN";
+                if (flight.arrivalTime) {
+                  const [datePart, timePart] = flight.departureTime.split("T");
+                  departureD = datePart;
+                  const [hours, minutes] = timePart.split(":");
+                  departureH = `${hours}:${minutes}`; // '00:00' formatında
+                }
+                let arrivalD = "UNKNOWN";
+                let arrivalH = "UNKNOWN";
+                if (flight.arrivalTime) {
+                  const [arrivalPart, arrivalTimePart] =
+                    flight.arrivalTime.split("T");
+                  arrivalD = arrivalPart;
+                  const [arrivalHours, arrivalMinutes] =
+                    arrivalTimePart.split(":");
+                  arrivalH = `${arrivalHours}:${arrivalMinutes}`; // '00:00' formatında
+                }
+
+                // Sadece gerekli verileri frontend'e döndür
+                resolve({
+                  from: flight.prefixIATA, // Kalkış yeri
+                  to: flight.route.destinations[0], // Varış yeri
+                  departureDay: departureD, // Kalkış günü
+                  departureHour: departureH, // Kalkış saati
+                  arrivalDay: arrivalD, // Varış günü
+                  arrivalHour: arrivalH, // Varış saati
+                  price: 100, // Örnek fiyat, gerçek fiyatı buradan bulabilirsiniz
+                });
+              } catch (error) {
+                reject("Uçuş detayları alınamadı");
+              }
+            });
+          })
+          .on("error", (error) => reject(error))
+          .end();
       });
     });
 
     const flightDetails = await Promise.all(flightDetailsPromises);
     res.json(flightDetails); // Uçuşları frontend'e gönder
   } catch (error) {
-    res.status(500).json({ error: 'Uçuşlar alınamadı' });
+    res.status(500).json({ error: "Uçuşlar alınamadı" });
   }
 });
 

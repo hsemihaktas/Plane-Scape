@@ -10,7 +10,7 @@ const Ucuslarim = () => {
   useEffect(() => {
     const fetchFlights = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/ucuslarim");
+        const response = await axios.get("http://localhost:3001/myFlights");
         setFlights(response.data); // Uçuşları state'e kaydet
         setLoading(false); // Yükleme tamamlandığında loading'i false yap
       } catch (err) {

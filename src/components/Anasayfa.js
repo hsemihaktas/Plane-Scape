@@ -16,20 +16,31 @@ const Anasayfa = () => {
     const fetchFlights = async () => {
       try {
         axios
-          .get("http://localhost:3001/flights")
+          .get("http://localhost:3001/allFlights")
           .then((response) => {
             const transformedFlights = response.data.map((flight) => {
-              const id = flight.id 
+              const id = flight.id;
               const from = flight.prefixIATA || "Unknown";
               const to = flight.destinationAirport || "Unknown";
-              const [datePart, timePart] = flight.departureTime.split("T");
-              const departureDay = datePart;
-              const [hours, minutes] = timePart.split(":");
-              const departureHour = `${hours}:${minutes}`; // '00:00' formatında
-              const [arrivalPart, arrivalTimePart] = flight.arrivalTime.split("T");
-              const arrivalDay = arrivalPart;
-              const [arrivalHours, arrivalMinutes] = arrivalTimePart.split(":");
-              const arrivalHour = `${arrivalHours}:${arrivalMinutes}`; // '00:00' formatında
+
+              let departureDay = "UNKNOWN";
+              let departureHour = "UNKNOWN";
+              if (flight.arrivalTime) {
+                const [datePart, timePart] = flight.departureTime.split("T");
+                departureDay = datePart;
+                const [hours, minutes] = timePart.split(":");
+                departureHour = `${hours}:${minutes}`; // '00:00' formatında
+              }
+              let arrivalDay = "UNKNOWN";
+              let arrivalHour = "UNKNOWN";
+              if (flight.arrivalTime) {
+                const [arrivalPart, arrivalTimePart] =
+                  flight.arrivalTime.split("T");
+                arrivalDay = arrivalPart;
+                const [arrivalHours, arrivalMinutes] =
+                  arrivalTimePart.split(":");
+                arrivalHour = `${arrivalHours}:${arrivalMinutes}`; // '00:00' formatında
+              }
               const stops = flight.flightStates
                 ? flight.flightStates.length
                 : 99;
@@ -63,33 +74,32 @@ const Anasayfa = () => {
 
   const handleFilter = (filters) => {
     const { minPrice, maxPrice, sortOrder, arrivalHour, stops } = filters;
-  
+
     const filterByArrivalHour = (arrivalHour, filter) => {
       const [filterStart, filterEnd] = filter.split("-");
-      console.log("a")
+      console.log("a");
       const [filterStartHour, filterStartMinute] = filterStart.split(":");
       const [filterEndHour, filterEndMinute] = filterEnd.split(":");
-  
+
       const startTime = `${filterStartHour}:${filterStartMinute}`;
       const endTime = `${filterEndHour}:${filterEndMinute}`;
-  
+
       return arrivalHour >= startTime && arrivalHour <= endTime;
     };
-  
+
     let newFlights = flights.filter((flight) => {
       const isAboveMinPrice =
         minPrice !== null ? flight.price >= minPrice : true;
       const isBelowMaxPrice =
         maxPrice !== null ? flight.price <= maxPrice : true;
-      
+
       // Saat dilimi filtreleme
-      const isCorrectArrivalTime =
-      arrivalHour
-          ? filterByArrivalHour(flight.arrivalHour, arrivalHour)
-          : true;
-  
+      const isCorrectArrivalTime = arrivalHour
+        ? filterByArrivalHour(flight.arrivalHour, arrivalHour)
+        : true;
+
       const isCorrectStops = stops ? flight.stops === stops : true;
-  
+
       return (
         isAboveMinPrice &&
         isBelowMaxPrice &&
@@ -97,14 +107,14 @@ const Anasayfa = () => {
         isCorrectStops
       );
     });
-  
+
     // Fiyat sıralaması
     if (sortOrder === "ascending") {
       newFlights = newFlights.sort((a, b) => a.price - b.price);
     } else if (sortOrder === "descending") {
       newFlights = newFlights.sort((a, b) => b.price - a.price);
     }
-  
+
     setFilteredFlights(newFlights);
   };
 
